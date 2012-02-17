@@ -20,7 +20,7 @@ Just add these dependencies to your site's `<head>`, **in order**:
 
 ## Usage
 
-Here's a complete example.
+Let's start with a complete example.
 
 ```
 class User extends Backbone.Model
@@ -47,3 +47,11 @@ class User extends Backbone.Model
     @set { signed_up_at: new Date() }
 ```
 
+### Step 1: Extend Backbone.Model
+
+Add this code to your `initialize` function:
+
+```
+initialize: =>
+    _.extend @, new Backbone.Workflow(@)
+```
