@@ -128,7 +128,7 @@ TODO: Update help stuff for callbacks.
 Customize workflow.js by passing an attributes hash to the Backbone.Workflow constructor:
 
 ```
-_.extend @, new Backbone.Workflow(@, { attrName: 'my_custom_state' })
+new Backbone.Workflow(@, { attrName: 'my_custom_db_field' })
 ```
 
 Configurable parameters include:
