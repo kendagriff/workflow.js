@@ -20,6 +20,16 @@ class User extends Backbone.Model
   
   onSignUp: =>
     @set 'signed_up_at', new Date()
+
+class InitialFlow extends Backbone.Model
+  workflow:
+    states:
+      visitor: {}
+      user: {}
+  
+  initialize: =>
+    @set 'workflow_state', 'user', { silent: true }
+    _.extend @, new Backbone.Workflow(@)
   
 class NoWorkflow extends Backbone.Model
 
@@ -37,6 +47,10 @@ $(document).ready ->
   test 'user has initial workflow state', =>
     equal @user.workflowState(), 'visitor'
   
+  test 'user has custom initial workflow state', =>
+    model = new InitialFlow()
+    equal 'user', model.workflowState()
+  
   test 'transition to new state', =>
     equal @user.transition('signUp'), true
     equal @user.workflowState(), 'user'
@@ -44,7 +58,8 @@ $(document).ready ->
     equal @user.workflowState(), 'visitor'
   
   test 'throw error if no transition for current state', =>
-    equal @user.transition('yo'), false
+    raises =>
+      equal @user.transition('yo'), false
   
   test 'call user defined method for transition', =>
     equal @user.transition('signUp'), true

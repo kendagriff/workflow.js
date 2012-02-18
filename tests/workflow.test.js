@@ -1,5 +1,5 @@
 (function() {
-  var NoWorkflow, User;
+  var InitialFlow, NoWorkflow, User;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
@@ -54,6 +54,26 @@
     };
     return User;
   })();
+  InitialFlow = (function() {
+    __extends(InitialFlow, Backbone.Model);
+    function InitialFlow() {
+      this.initialize = __bind(this.initialize, this);
+      InitialFlow.__super__.constructor.apply(this, arguments);
+    }
+    InitialFlow.prototype.workflow = {
+      states: {
+        visitor: {},
+        user: {}
+      }
+    };
+    InitialFlow.prototype.initialize = function() {
+      this.set('workflow_state', 'user', {
+        silent: true
+      });
+      return _.extend(this, new Backbone.Workflow(this));
+    };
+    return InitialFlow;
+  })();
   NoWorkflow = (function() {
     __extends(NoWorkflow, Backbone.Model);
     function NoWorkflow() {
@@ -77,6 +97,11 @@
     test('user has initial workflow state', __bind(function() {
       return equal(this.user.workflowState(), 'visitor');
     }, this));
+    test('user has custom initial workflow state', __bind(function() {
+      var model;
+      model = new InitialFlow();
+      return equal('user', model.workflowState());
+    }, this));
     test('transition to new state', __bind(function() {
       equal(this.user.transition('signUp'), true);
       equal(this.user.workflowState(), 'user');
@@ -84,7 +109,9 @@
       return equal(this.user.workflowState(), 'visitor');
     }, this));
     test('throw error if no transition for current state', __bind(function() {
-      return equal(this.user.transition('yo'), false);
+      return raises(__bind(function() {
+        return equal(this.user.transition('yo'), false);
+      }, this));
     }, this));
     test('call user defined method for transition', __bind(function() {
       equal(this.user.transition('signUp'), true);

@@ -10,11 +10,13 @@
       if (attrs.attrName) {
         this.attrName = attrs.attrName;
       }
-      params = {
-        silent: true
-      };
-      params[this.attrName] = _.keys(this.model.workflow.states)[0];
-      this.model.set(params);
+      if (!this.model.get('workflow_state')) {
+        params = {};
+        params[this.attrName] = _.keys(this.model.workflow.states)[0];
+        this.model.set(params, {
+          silent: true
+        });
+      }
     }
     Workflow.prototype.transition = function(event) {
       var cb, e, params, state;
@@ -30,6 +32,7 @@
         }
         return true;
       } else {
+        throw "There is no transition '" + event + "' for state '" + (this.model.workflowState()) + "'.";
         return false;
       }
     };

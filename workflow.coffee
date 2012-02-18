@@ -12,9 +12,10 @@ class Backbone.Workflow
     @attrName = attrs.attrName if attrs.attrName
 
     # Set up the model's initial workflow state
-    params = { silent: true }
-    params[@attrName] = _.keys(@model.workflow.states)[0]
-    @model.set params
+    unless @model.get('workflow_state')
+      params = {}
+      params[@attrName] = _.keys(@model.workflow.states)[0]
+      @model.set params, { silent: true }
     
   # Handle transitions between states
   # Usage:
@@ -33,6 +34,7 @@ class Backbone.Workflow
       cb() if cb
       true
     else
+      throw "There is no transition '#{event}' for state '#{@model.workflowState()}'."
       false
 
   workflowState: -> @model.get(@attrName)
