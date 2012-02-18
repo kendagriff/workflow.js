@@ -1,6 +1,6 @@
 # workflow.js
 
-Finite state machine (FSM) for Backbone.js – works as a drop-in extension of Backbone.Model. What's it got on other JS-based state machines? It's simple, and has an intuitive syntax.
+Finite state machine (FSM) for Backbone.js – works as a drop-in extension of Backbone.Model. What's it got on other JS-based state machines? It's simple, and has an intuitive syntax. This FSM is loosely modeled after Ruby's `workflow` gem from [@geekq](https://github.com/geekq/workflow).
 
 ### Dependencies
 * JQuery
@@ -20,7 +20,7 @@ Just add these dependencies to your site's `<head>`, **in order**:
 
 ## Usage
 
-Let's start with a complete example.
+Let's start with a complete example (given in [CoffeeScript](http://coffeescript.org/)):
 
 ```
 class User extends Backbone.Model
@@ -45,6 +45,17 @@ class User extends Backbone.Model
   
   onSignUp: =>
     @set { signed_up_at: new Date() }
+
+
+user = new User()
+user.workflowState()
+  => "visitor"
+
+user.transition('signUp')
+user.workflowState()
+  => "user"
+user.get('signed_up_at')
+  => Fri Feb 17 2012 17:07:41 GMT-0700 (MST)
 ```
 
 ### Step 1: Extend Backbone.Model
@@ -55,3 +66,59 @@ Add this code to your `initialize` function:
 initialize: =>
     _.extend @, new Backbone.Workflow(@)
 ```
+
+### Step 2: Define Your Workflow
+
+Create an array named `workflow`, as a property on your model, and define its `states`:
+
+```
+class User extends Backbone.Model
+  workflow:
+    states:
+      visitor: {}
+      user: {}
+      superUser: {}
+      lostVisitor: {}
+```
+
+### Step 3: Define Your Events
+
+Add an `events` array to each state:
+
+```
+class User extends Backbone.Model
+  workflow:
+    states:
+      visitor:
+        events:
+          signUp: { transitionsTo: 'user' }
+          bail: { transitionsTo: 'lostUser' }
+      user:
+        events:
+          closeAccount: { transitionsTo: 'visitor' }
+          promote: { transitionsTo: 'superUser' }
+      superUser: {}
+      lostVisitor: {}
+```
+
+### Step 4: Instantiate Your Model
+
+workflow.js will automatically set your model to its first state, `visitor`. The helper function `workflowState()` will always return your model's current state.
+
+```
+user = new User()
+user.workflowState()
+  => "visitor"
+```
+
+### Step 5: Initiate a Transition
+
+```
+user.transition('signUp')
+user.workflowState()
+  => "user"
+```
+
+## Callbacks
+
+TODO: Update help stuff for callbacks.
