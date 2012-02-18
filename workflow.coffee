@@ -24,14 +24,22 @@ class Backbone.Workflow
     state = @model.workflow.states[@model.workflowState()]
     e = state.events[event]
     if e
+      # Trigger transition:from event
+      @model.trigger "transition:from:#{@model.workflowState()}"
+
+      # Change state
       params = {}
       params[@attrName] = e.transitionsTo
       @model.set params
 
-      # Handle Callbacks
+      # Handle user defined callback
       # upper = event.charAt(0)
       cb = @model["on#{event.charAt(0).toUpperCase()}#{event.substr(1, event.length-1)}"]
       cb() if cb
+
+      # Trigger transition:to event
+      @model.trigger "transition:to:#{@model.workflowState()}"
+
       true
     else
       throw "There is no transition '#{event}' for state '#{@model.workflowState()}'."

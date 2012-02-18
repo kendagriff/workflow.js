@@ -82,7 +82,7 @@
     return NoWorkflow;
   })();
   $(document).ready(function() {
-    module('workflow', {
+    module('basic workflow', {
       setup: __bind(function() {
         return this.user = new User();
       }, this)
@@ -118,8 +118,34 @@
       equal(this.user.workflowState(), 'user');
       return notEqual(this.user.get('signed_up_at'), null);
     }, this));
-    return test('custom attributes name', __bind(function() {
+    test('custom attributes name', __bind(function() {
       return equal(this.user.get('workflow_blate'), this.user.workflowState());
+    }, this));
+    module('transitions', {
+      setup: __bind(function() {
+        return this.user = new User();
+      }, this)
+    });
+    test('transition:from', __bind(function() {
+      var i;
+      i = 0;
+      this.user.bind('transition:from:visitor', function() {
+        return i = 1;
+      });
+      this.user.transition('signUp');
+      return equal(i, 1);
+    }, this));
+    return test('transition:to', __bind(function() {
+      var i;
+      i = 0;
+      this.user.bind('transition:from:visitor', function() {
+        return i = 1;
+      });
+      this.user.bind('transition:to:user', function() {
+        return i = 2;
+      });
+      this.user.transition('signUp');
+      return equal(i, 2);
     }, this));
   });
 }).call(this);

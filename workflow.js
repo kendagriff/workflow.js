@@ -23,6 +23,7 @@
       state = this.model.workflow.states[this.model.workflowState()];
       e = state.events[event];
       if (e) {
+        this.model.trigger("transition:from:" + (this.model.workflowState()));
         params = {};
         params[this.attrName] = e.transitionsTo;
         this.model.set(params);
@@ -30,6 +31,7 @@
         if (cb) {
           cb();
         }
+        this.model.trigger("transition:to:" + (this.model.workflowState()));
         return true;
       } else {
         throw "There is no transition '" + event + "' for state '" + (this.model.workflowState()) + "'.";

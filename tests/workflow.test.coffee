@@ -35,7 +35,7 @@ class NoWorkflow extends Backbone.Model
 
 $(document).ready ->
 
-  module 'workflow',
+  module 'basic workflow',
     setup: =>
       @user = new User()
 
@@ -68,5 +68,22 @@ $(document).ready ->
   
   test 'custom attributes name', =>
     equal @user.get('workflow_blate'), @user.workflowState()
+
+  module 'transitions',
+    setup: =>
+      @user = new User()
+    
+  test 'transition:from', =>
+    i = 0
+    @user.bind 'transition:from:visitor', -> i = 1
+    @user.transition 'signUp'
+    equal i, 1
+  
+  test 'transition:to', =>
+    i = 0
+    @user.bind 'transition:from:visitor', -> i = 1
+    @user.bind 'transition:to:user', -> i = 2
+    @user.transition 'signUp'
+    equal i, 2
 
 
