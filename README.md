@@ -122,3 +122,16 @@ user.workflowState()
 ## Callbacks
 
 TODO: Update help stuff for callbacks.
+
+## Customizations
+
+Customize workflow.js by passing an attributes hash to the Backbone.Workflow constructor:
+
+```
+_.extend @, new Backbone.Workflow(@, { attrName: 'my_custom_state' })
+```
+
+Configurable parameters include:
+
+* `attrName`: Backbone.Model attribute used to persist state at the server level. Default is `workflow_state`.
+

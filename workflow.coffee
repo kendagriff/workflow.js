@@ -3,12 +3,18 @@
 # Version 0.0.1
 
 class Backbone.Workflow
-  constructor: (model) ->
+  attrName: 'workflow_state'
+
+  constructor: (model, attrs={}) ->
     @model = model
 
+    # Customize the workflow attribute name
+    @attrName = attrs.attrName if attrs.attrName
+
     # Set up the model's initial workflow state
-    @model.set { workflow_state: _.keys(@model.workflow.states)[0] },
-      { silent: true }
+    params = { silent: true }
+    params[@attrName] = _.keys(@model.workflow.states)[0]
+    @model.set params
     
   # Handle transitions between states
   # Usage:
@@ -17,7 +23,9 @@ class Backbone.Workflow
     state = @model.workflow.states[@model.workflowState()]
     e = state.events[event]
     if e
-      @model.set({ workflow_state: e.transitionsTo })
+      params = {}
+      params[@attrName] = e.transitionsTo
+      @model.set params
 
       # Handle Callbacks
       # upper = event.charAt(0)
@@ -27,4 +35,4 @@ class Backbone.Workflow
     else
       false
 
-  workflowState: -> @model.get('workflow_state')
+  workflowState: -> @model.get(@attrName)

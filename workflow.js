@@ -1,21 +1,29 @@
 (function() {
   Backbone.Workflow = (function() {
-    function Workflow(model) {
+    Workflow.prototype.attrName = 'workflow_state';
+    function Workflow(model, attrs) {
+      var params;
+      if (attrs == null) {
+        attrs = {};
+      }
       this.model = model;
-      this.model.set({
-        workflow_state: _.keys(this.model.workflow.states)[0]
-      }, {
+      if (attrs.attrName) {
+        this.attrName = attrs.attrName;
+      }
+      params = {
         silent: true
-      });
+      };
+      params[this.attrName] = _.keys(this.model.workflow.states)[0];
+      this.model.set(params);
     }
     Workflow.prototype.transition = function(event) {
-      var cb, e, state;
+      var cb, e, params, state;
       state = this.model.workflow.states[this.model.workflowState()];
       e = state.events[event];
       if (e) {
-        this.model.set({
-          workflow_state: e.transitionsTo
-        });
+        params = {};
+        params[this.attrName] = e.transitionsTo;
+        this.model.set(params);
         cb = this.model["on" + (event.charAt(0).toUpperCase()) + (event.substr(1, event.length - 1))];
         if (cb) {
           cb();
@@ -26,7 +34,7 @@
       }
     };
     Workflow.prototype.workflowState = function() {
-      return this.model.get('workflow_state');
+      return this.model.get(this.attrName);
     };
     return Workflow;
   })();

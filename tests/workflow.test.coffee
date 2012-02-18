@@ -16,7 +16,7 @@ class User extends Backbone.Model
       lostVisitor: {}
 
   initialize: =>
-    _.extend @, new Backbone.Workflow(@)
+    _.extend @, new Backbone.Workflow(@, { attrName: 'workflow_blate' })
   
   onSignUp: =>
     @set 'signed_up_at', new Date()
@@ -32,10 +32,10 @@ $(document).ready ->
   test 'do nothing if no workflow state is delcared', =>
     ok =>
       model = new NoWorkflow()
-      equal model.get('workflow_state'), null
+      equal model.workflowState(), null
 
   test 'user has initial workflow state', =>
-    equal @user.get('workflow_state'), 'visitor'
+    equal @user.workflowState(), 'visitor'
   
   test 'transition to new state', =>
     equal @user.transition('signUp'), true
@@ -50,5 +50,8 @@ $(document).ready ->
     equal @user.transition('signUp'), true
     equal @user.workflowState(), 'user'
     notEqual @user.get('signed_up_at'), null
+  
+  test 'custom attributes name', =>
+    equal @user.get('workflow_blate'), @user.workflowState()
 
 

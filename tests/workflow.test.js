@@ -45,7 +45,9 @@
       }
     };
     User.prototype.initialize = function() {
-      return _.extend(this, new Backbone.Workflow(this));
+      return _.extend(this, new Backbone.Workflow(this, {
+        attrName: 'workflow_blate'
+      }));
     };
     User.prototype.onSignUp = function() {
       return this.set('signed_up_at', new Date());
@@ -69,11 +71,11 @@
       return ok(__bind(function() {
         var model;
         model = new NoWorkflow();
-        return equal(model.get('workflow_state'), null);
+        return equal(model.workflowState(), null);
       }, this));
     }, this));
     test('user has initial workflow state', __bind(function() {
-      return equal(this.user.get('workflow_state'), 'visitor');
+      return equal(this.user.workflowState(), 'visitor');
     }, this));
     test('transition to new state', __bind(function() {
       equal(this.user.transition('signUp'), true);
@@ -84,10 +86,13 @@
     test('throw error if no transition for current state', __bind(function() {
       return equal(this.user.transition('yo'), false);
     }, this));
-    return test('call user defined method for transition', __bind(function() {
+    test('call user defined method for transition', __bind(function() {
       equal(this.user.transition('signUp'), true);
       equal(this.user.workflowState(), 'user');
       return notEqual(this.user.get('signed_up_at'), null);
+    }, this));
+    return test('custom attributes name', __bind(function() {
+      return equal(this.user.get('workflow_blate'), this.user.workflowState());
     }, this));
   });
 }).call(this);
