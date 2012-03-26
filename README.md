@@ -28,6 +28,9 @@ class User extends Backbone.Model
     signed_up_at: null
 
   workflow:
+    initial: 'visitor'
+
+  workflow:
     states:
       visitor:
         events:

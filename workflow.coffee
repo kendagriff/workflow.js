@@ -14,33 +14,29 @@ class Backbone.Workflow
     # Set up the model's initial workflow state
     unless @model.get(@attrName)
       params = {}
-      params[@attrName] = _.keys(@model.workflow.states)[0]
+      params[@attrName] = @model.workflow.initial
+      throw "Set the initial property to your initial workflow state." unless params[@attrName]
       @model.set params, { silent: true }
     
   # Handle transitions between states
   # Usage:
-  #   @user.transition('go')
-  transition: (event, opts) ->
+  #   @user.triggerEvent('go')
+  triggerEvent: (event, opts) ->
     opts ||= {}
-    state = @model.workflow.states[@model.workflowState()]
-    e = state.events[event]
-    if e
+
+    event = _.first(_.select(@model.workflow.events, (e) => e.name is event and e.from is @model.workflowState()))
+    if event
       # Trigger transition:from event
       @model.trigger "transition:from:#{@model.workflowState()}"
 
       # Change state
       params = {}
-      params[@attrName] = e.transitionsTo
+      params[@attrName] = event.to
       @model.set params
-
-      # Handle user defined callback
-      # upper = event.charAt(0)
-      cb = @model["on#{event.charAt(0).toUpperCase()}#{event.substr(1, event.length-1)}"]
-      cb() if cb
-
+      
       # Trigger transition:to event
       @model.trigger "transition:to:#{@model.workflowState()}"
-
+      
       true
     else
       throw "There is no transition '#{event}' for state '#{@model.workflowState()}'."

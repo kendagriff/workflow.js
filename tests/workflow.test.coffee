@@ -3,34 +3,30 @@ class User extends Backbone.Model
     signed_up_at: null
 
   workflow:
-    states:
-      visitor:
-        events:
-          signUp: { transitionsTo: 'user' }
-          bail: { transitionsTo: 'lostUser' }
-      user:
-        events:
-          closeAccount: { transitionsTo: 'visitor' }
-          promote: { transitionsTo: 'superUser' }
-      superUser: {}
-      lostVisitor: {}
+    initial: 'visitor'
+    events: [
+      { name: 'signUp', from: 'visitor', to: 'user' }
+      { name: 'bail', from: 'visitor', to: 'lostUser' }
+      { name: 'closeAccount', from: 'user', to: 'visitor' }
+      { name: 'promote', from: 'user', to: 'superUser' }
+    ]
 
   initialize: =>
     _.extend @, new Backbone.Workflow(@, { attrName: 'workflow_blate' })
-  
-  onSignUp: =>
-    @set 'signed_up_at', new Date()
 
 class InitialFlow extends Backbone.Model
   workflow:
-    states:
-      visitor: {}
-      user: {}
-  
+    initial: 'visitor'
+
   initialize: =>
     @set 'workflow_state', 'user', { silent: true }
     _.extend @, new Backbone.Workflow(@)
   
+class NoInitialFlow extends Backbone.Model
+  workflow: {}
+
+  initialize: => _.extend @, new Backbone.Workflow(@)
+
 class NoWorkflow extends Backbone.Model
 
 $(document).ready ->
@@ -44,6 +40,10 @@ $(document).ready ->
       model = new NoWorkflow()
       equal model.workflowState(), null
 
+  test 'error for no initial state', =>
+    raises =>
+      model = new NoInitialFlow()
+
   test 'user has initial workflow state', =>
     equal @user.workflowState(), 'visitor'
   
@@ -51,43 +51,38 @@ $(document).ready ->
     model = new InitialFlow()
     equal 'user', model.workflowState()
   
-  test 'transition to new state', =>
-    equal @user.transition('signUp'), true
+  test 'triggerEvent to new state', =>
+    equal @user.triggerEvent('signUp'), true
     equal @user.workflowState(), 'user'
-    equal @user.transition('closeAccount'), true
+    equal @user.triggerEvent('closeAccount'), true
     equal @user.workflowState(), 'visitor'
-  
-  test 'throw error if no transition for current state', =>
+
+  test 'error if no event for current state', =>
     raises =>
-      equal @user.transition('yo'), false
-  
-  test 'call user defined method for transition', =>
-    equal @user.transition('signUp'), true
-    equal @user.workflowState(), 'user'
-    notEqual @user.get('signed_up_at'), null
+      equal @user.triggerEvent('closeAccount'), false
   
   test 'custom attributes name', =>
     equal @user.get('workflow_blate'), @user.workflowState()
 
-  module 'transitions',
+  module 'triggerEvents',
     setup: =>
       @user = new User()
     
-  test 'transition:from', =>
+  test 'triggerEvent:from', =>
     i = 0
     @user.on 'transition:from:visitor', -> i = 1
-    @user.transition 'signUp'
+    @user.triggerEvent 'signUp'
     equal i, 1
   
-  test 'transition:to', =>
+  test 'triggerEvent:to', =>
     i = 0
     @user.on 'transition:from:visitor', -> i = 1
     @user.on 'transition:to:user', -> i = 2
-    @user.transition 'signUp'
+    @user.triggerEvent 'signUp'
     equal i, 2
 
   test 'option to persist to server', =>
-    @user.transition 'signUp'
+    @user.triggerEvent 'signUp'
 
 
 

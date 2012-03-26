@@ -1,5 +1,5 @@
 (function() {
-  var InitialFlow, NoWorkflow, User;
+  var InitialFlow, NoInitialFlow, NoWorkflow, User;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
@@ -11,7 +11,6 @@
   User = (function() {
     __extends(User, Backbone.Model);
     function User() {
-      this.onSignUp = __bind(this.onSignUp, this);
       this.initialize = __bind(this.initialize, this);
       User.__super__.constructor.apply(this, arguments);
     }
@@ -19,38 +18,31 @@
       signed_up_at: null
     };
     User.prototype.workflow = {
-      states: {
-        visitor: {
-          events: {
-            signUp: {
-              transitionsTo: 'user'
-            },
-            bail: {
-              transitionsTo: 'lostUser'
-            }
-          }
-        },
-        user: {
-          events: {
-            closeAccount: {
-              transitionsTo: 'visitor'
-            },
-            promote: {
-              transitionsTo: 'superUser'
-            }
-          }
-        },
-        superUser: {},
-        lostVisitor: {}
-      }
+      initial: 'visitor',
+      events: [
+        {
+          name: 'signUp',
+          from: 'visitor',
+          to: 'user'
+        }, {
+          name: 'bail',
+          from: 'visitor',
+          to: 'lostUser'
+        }, {
+          name: 'closeAccount',
+          from: 'user',
+          to: 'visitor'
+        }, {
+          name: 'promote',
+          from: 'user',
+          to: 'superUser'
+        }
+      ]
     };
     User.prototype.initialize = function() {
       return _.extend(this, new Backbone.Workflow(this, {
         attrName: 'workflow_blate'
       }));
-    };
-    User.prototype.onSignUp = function() {
-      return this.set('signed_up_at', new Date());
     };
     return User;
   })();
@@ -61,10 +53,7 @@
       InitialFlow.__super__.constructor.apply(this, arguments);
     }
     InitialFlow.prototype.workflow = {
-      states: {
-        visitor: {},
-        user: {}
-      }
+      initial: 'visitor'
     };
     InitialFlow.prototype.initialize = function() {
       this.set('workflow_state', 'user', {
@@ -73,6 +62,18 @@
       return _.extend(this, new Backbone.Workflow(this));
     };
     return InitialFlow;
+  })();
+  NoInitialFlow = (function() {
+    __extends(NoInitialFlow, Backbone.Model);
+    function NoInitialFlow() {
+      this.initialize = __bind(this.initialize, this);
+      NoInitialFlow.__super__.constructor.apply(this, arguments);
+    }
+    NoInitialFlow.prototype.workflow = {};
+    NoInitialFlow.prototype.initialize = function() {
+      return _.extend(this, new Backbone.Workflow(this));
+    };
+    return NoInitialFlow;
   })();
   NoWorkflow = (function() {
     __extends(NoWorkflow, Backbone.Model);
@@ -94,6 +95,12 @@
         return equal(model.workflowState(), null);
       }, this));
     }, this));
+    test('error for no initial state', __bind(function() {
+      return raises(__bind(function() {
+        var model;
+        return model = new NoInitialFlow();
+      }, this));
+    }, this));
     test('user has initial workflow state', __bind(function() {
       return equal(this.user.workflowState(), 'visitor');
     }, this));
@@ -102,40 +109,35 @@
       model = new InitialFlow();
       return equal('user', model.workflowState());
     }, this));
-    test('transition to new state', __bind(function() {
-      equal(this.user.transition('signUp'), true);
+    test('triggerEvent to new state', __bind(function() {
+      equal(this.user.triggerEvent('signUp'), true);
       equal(this.user.workflowState(), 'user');
-      equal(this.user.transition('closeAccount'), true);
+      equal(this.user.triggerEvent('closeAccount'), true);
       return equal(this.user.workflowState(), 'visitor');
     }, this));
-    test('throw error if no transition for current state', __bind(function() {
+    test('error if no event for current state', __bind(function() {
       return raises(__bind(function() {
-        return equal(this.user.transition('yo'), false);
+        return equal(this.user.triggerEvent('closeAccount'), false);
       }, this));
-    }, this));
-    test('call user defined method for transition', __bind(function() {
-      equal(this.user.transition('signUp'), true);
-      equal(this.user.workflowState(), 'user');
-      return notEqual(this.user.get('signed_up_at'), null);
     }, this));
     test('custom attributes name', __bind(function() {
       return equal(this.user.get('workflow_blate'), this.user.workflowState());
     }, this));
-    module('transitions', {
+    module('triggerEvents', {
       setup: __bind(function() {
         return this.user = new User();
       }, this)
     });
-    test('transition:from', __bind(function() {
+    test('triggerEvent:from', __bind(function() {
       var i;
       i = 0;
       this.user.on('transition:from:visitor', function() {
         return i = 1;
       });
-      this.user.transition('signUp');
+      this.user.triggerEvent('signUp');
       return equal(i, 1);
     }, this));
-    test('transition:to', __bind(function() {
+    test('triggerEvent:to', __bind(function() {
       var i;
       i = 0;
       this.user.on('transition:from:visitor', function() {
@@ -144,11 +146,11 @@
       this.user.on('transition:to:user', function() {
         return i = 2;
       });
-      this.user.transition('signUp');
+      this.user.triggerEvent('signUp');
       return equal(i, 2);
     }, this));
     return test('option to persist to server', __bind(function() {
-      return this.user.transition('signUp');
+      return this.user.triggerEvent('signUp');
     }, this));
   });
 }).call(this);
