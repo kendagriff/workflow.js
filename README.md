@@ -29,19 +29,12 @@ class User extends Backbone.Model
 
   workflow:
     initial: 'visitor'
-
-  workflow:
-    states:
-      visitor:
-        events:
-          signUp: { transitionsTo: 'user' }
-          bail: { transitionsTo: 'lostUser' }
-      user:
-        events:
-          closeAccount: { transitionsTo: 'visitor' }
-          promote: { transitionsTo: 'superUser' }
-      superUser: {}
-      lostVisitor: {}
+    events: [
+      { name: 'signUp', from: 'visitor', to: 'user' }
+      { name: 'bail', from: 'visitor', to: 'lostUser' }
+      { name: 'closeAccount', from: 'user', to: 'visitor' }
+      { name: 'promote', from: 'user', to: 'superUser' }
+    ]
 
   initialize: =>
     _.extend @, new Backbone.Workflow(@)
@@ -53,7 +46,7 @@ class User extends Backbone.Model
 user = new User()
 user.workflowState() # => "visitor"
 
-user.transition('signUp')
+user.triggerEvent('signUp')
 user.workflowState() # => "user"
 user.get('signed_up_at') # => Fri Feb 17 2012 17:07:41 GMT-0700 (MST)
 ```
@@ -71,41 +64,23 @@ initialize: =>
 
 ### Step 2: Define Your Workflow
 
-Create an array named `workflow`, as a property on your model, and define its `states`:
+Create an object named `workflow`, as a property on your model, and define its events and states:
 
 ```
 class User extends Backbone.Model
   workflow:
-    states:
-      visitor: {}
-      user: {}
-      superUser: {}
-      lostVisitor: {}
+    initial: 'visitor'
+    events: [
+      { name: 'signUp', from: 'visitor', to: 'user' }
+      { name: 'bail', from: 'visitor', to: 'lostUser' }
+      { name: 'closeAccount', from: 'user', to: 'visitor' }
+      { name: 'promote', from: 'user', to: 'superUser' }
+    ]
 ```
 
-### Step 3: Define Your Events
+### Step 3: Instantiate Your Model
 
-Add an `events` array to each state:
-
-```
-class User extends Backbone.Model
-  workflow:
-    states:
-      visitor:
-        events:
-          signUp: { transitionsTo: 'user' }
-          bail: { transitionsTo: 'lostUser' }
-      user:
-        events:
-          closeAccount: { transitionsTo: 'visitor' }
-          promote: { transitionsTo: 'superUser' }
-      superUser: {}
-      lostVisitor: {}
-```
-
-### Step 4: Instantiate Your Model
-
-workflow.js will automatically set your model to its first state, `visitor`. The helper function `workflowState()` will always return your model's current state.
+The helper function `workflowState()` will always return your model's current state.
 
 ```
 user = new User()
@@ -115,7 +90,7 @@ user.workflowState() # => "visitor"
 ### Step 5: Initiate a Transition
 
 ```
-user.transition('signUp')
+user.triggerEvent('signUp')
 user.workflowState() # => "user"
 ```
 
@@ -134,10 +109,6 @@ user.bind 'transition:to:user', -> alert("I'm no longer just a visitor!")
 ```
 
 Transitions are handled before (`transition:from`), and after (`transition:to`), the user defined call back.
-
-## Callbacks
-
-TODO: Update help stuff for callbacks.
 
 ## Customizations
 
