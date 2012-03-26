@@ -80,18 +80,17 @@ class User extends Backbone.Model
 
 ### Step 3: Instantiate Your Model
 
-The helper function `workflowState()` will always return your model's current state.
-
+The `workflow_state` attribute is offered as the default persistence field. This can be changed: see Customizations below.
 ```
 user = new User()
-user.workflowState() # => "visitor"
+user.get('workflow_state') # => "visitor"
 ```
 
 ### Step 5: Initiate a Transition
 
 ```
 user.triggerEvent('signUp')
-user.workflowState() # => "user"
+user.get('workflow_state') # => "user"
 ```
 
 ## Binding Events To Transitions
