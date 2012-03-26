@@ -124,7 +124,7 @@ Configurable parameters include:
 
 ## Multiple Workflows
 
-To define multiple workflows, simply create a workflow object with a name of your choosing. Instantiate the workflows by passing a configuration array to `Workflow` constructor.
+To define multiple workflows, simply create a workflow object with a name of your choosing. Instantiate the workflows by passing a configuration array to the `Workflow` constructor.
 
 Like this:
 
@@ -152,7 +152,7 @@ class DualPersonalityUser extends Backbone.Model
     _.extend @, new Backbone.Workflow(@, {}, workflows)
 ```
 
-You will need to modify the methods you use to interact with the workflows.
+`attrName` refers to the Backbone fields you want to persist the workflow states to. You will also need to modify the methods you use to interact with the workflows.
 
 To trigger an event, pass as the second argument the name of your workflow:
 
