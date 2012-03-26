@@ -10,7 +10,7 @@
       if (attrs.attrName) {
         this.attrName = attrs.attrName;
       }
-      if (!this.model.workflowState()) {
+      if (!this.model.get(this.attrName)) {
         params = {};
         params[this.attrName] = _.keys(this.model.workflow.states)[0];
         this.model.set(params, {

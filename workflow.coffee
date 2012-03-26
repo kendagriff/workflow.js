@@ -12,7 +12,7 @@ class Backbone.Workflow
     @attrName = attrs.attrName if attrs.attrName
 
     # Set up the model's initial workflow state
-    unless @model.workflowState()
+    unless @model.get(@attrName)
       params = {}
       params[@attrName] = _.keys(@model.workflow.states)[0]
       @model.set params, { silent: true }
