@@ -1,6 +1,6 @@
 # workflow.js
 
-Finite-state machine (FSM) for Backbone.js with an **elegant** syntax. Works as a drop-in extension of Backbone.Model. What's it got on other JS-based state machines? It's simple, and has an intuitive syntax. This FSM is loosely modeled after the [Ruby workflow gem from geekq](https://github.com/geekq/workflow).
+Finite-state machine (FSM) for Backbone.js with an **elegant** syntax. Works as a drop-in extension of Backbone.Model. What's it got on other JS-based state machines? It's simple, it works out-of-the-box with Backbone.js, and it supports multiple state machines. This FSM is loosely modeled after the [Ruby workflow gem from geekq](https://github.com/geekq/workflow).
 
 ### Dependencies
 * JQuery
