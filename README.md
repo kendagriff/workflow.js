@@ -124,7 +124,7 @@ Configurable parameters include:
 
 ## Multiple Workflows
 
-To define multiple workflows, simply create a workflow object with a name of your choosing. Initiathe workflows by passing a configuration array to `Workflow` constructor.
+To define multiple workflows, simply create a workflow object with a name of your choosing. Instantiate the workflows by passing a configuration array to `Workflow` constructor.
 
 Like this:
 
