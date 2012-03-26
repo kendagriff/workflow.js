@@ -1,6 +1,6 @@
 # workflow.js
 
-Finite-state machine (FSM) for Backbone.js – works as a drop-in extension of Backbone.Model. What's it got on other JS-based state machines? It's simple, and has an intuitive syntax. This FSM is loosely modeled after the [Ruby workflow gem from geekq](https://github.com/geekq/workflow).
+Finite-state machine (FSM) for Backbone.js with an **elegant** syntax. Works as a drop-in extension of Backbone.Model. What's it got on other JS-based state machines? It's simple, and has an intuitive syntax. This FSM is loosely modeled after the [Ruby workflow gem from geekq](https://github.com/geekq/workflow).
 
 ### Dependencies
 * JQuery
@@ -44,10 +44,10 @@ class User extends Backbone.Model
 
 
 user = new User()
-user.workflowState() # => "visitor"
+user.get('workflow_state') # => "visitor"
 
 user.triggerEvent('signUp')
-user.workflowState() # => "user"
+user.get('workflow_state') # => "user"
 user.get('signed_up_at') # => Fri Feb 17 2012 17:07:41 GMT-0700 (MST)
 ```
 
@@ -120,5 +120,49 @@ new Backbone.Workflow(@, { attrName: 'my_custom_db_field' })
 
 Configurable parameters include:
 
-* `attrName`: Backbone.Model attribute used to persist state at the server level. Default is `workflow_state`.
+* `attrName`: Backbone.Model attribute used to persist state at the server level. Default is "workflow_state"
 
+## Multiple Workflows
+
+To define multiple workflows, simply create a workflow object with a name of your choosing. Initiathe workflows by passing a configuration array to `Workflow` constructor.
+
+Like this:
+
+```
+class DualPersonalityUser extends Backbone.Model
+  jekyll_workflow:
+    initial: 'happy'
+    events: [
+      { name: 'stub_toe', from: 'happy', to: 'hurting' }
+      { name: 'get_massage', from: 'hurting', to: 'happy' }
+    ]
+
+  hyde_workflow:
+    initial: 'catatonic'
+    events: [
+      { name: 'stub_toe', from: 'catatonic', to: 'ticked' }
+      { name: 'get_massage', from: 'ticked', to: 'catatonic' }
+    ]
+
+  initialize: =>
+    workflows = [
+      { name: 'jekyll_workflow', attrName: 'jekyll_workflow_state' }
+      { name: 'hyde_workflow', attrName: 'hyde_workflow_state' }
+    ]
+    _.extend @, new Backbone.Workflow(@, {}, workflows)
+```
+
+You will need to modify the methods you use to interact with the workflows.
+
+To trigger an event, pass as the second argument the name of your workflow:
+
+```
+@user.triggerEvent('stub_toe', 'jekyll_workflow')
+```
+
+You'll handle transitions simililarly:
+
+```
+@user.on 'transition:from:jekyll_workflow:happy'
+@user.on 'transition:to:jekyll_workflow:hurting'
+```

@@ -3,43 +3,59 @@
 # Version 0.0.1
 
 class Backbone.Workflow
-  attrName: 'workflow_state'
-
-  constructor: (model, attrs={}) ->
+  constructor: (model, attrs={}, workflows) ->
     @model = model
+    @model.workflows = []
 
-    # Customize the workflow attribute name
-    @attrName = attrs.attrName if attrs.attrName
+    # Add default workflow to list of workflows
+    if @model.workflow
+      @model.workflow.name = 'default'
+      @model.workflow.attrName = attrs?.attrName || 'workflow_state'
+      @model.workflows.push @model.workflow
 
-    # Set up the model's initial workflow state
-    unless @model.get(@attrName)
-      params = {}
-      params[@attrName] = @model.workflow.initial
-      throw "Set the initial property to your initial workflow state." unless params[@attrName]
-      @model.set params, { silent: true }
+    # Set up multiple workflows
+    if workflows
+      for w in workflows
+        obj = @model[w.name]
+        w.initial = obj.initial
+        w.events = obj.events
+        @model.workflows.push w
+
+    # Set up the model's initial workflow states
+    for workflow in @model.workflows
+      unless @model.get(workflow.attrName)
+        params = {}
+        params[workflow.attrName] = workflow.initial
+        throw "Set the initial property to your initial workflow state." unless params[workflow.attrName]
+        @model.set params, { silent: true }
     
   # Handle transitions between states
   # Usage:
   #   @user.triggerEvent('go')
-  triggerEvent: (event, opts) ->
-    opts ||= {}
+  #   @user.triggerEvent('go', 'workflow_name')
+  triggerEvent: (event, workflowName) ->
+    workflow = _.detect(@model.workflows, (w) => w.name is if workflowName then workflowName else 'default')
+    if workflow
+      event = _.detect(workflow.events, (e) => e.name is event and e.from is @model.get(workflow.attrName))
+      if event
+        # Trigger transition:from event
+        if workflow.name is 'default'
+          @model.trigger "transition:from:#{@model.get(workflow.attrName)}"
+        else
+          @model.trigger "transition:from:#{workflow.name}:#{@model.get(workflow.attrName)}"
 
-    event = _.first(_.select(@model.workflow.events, (e) => e.name is event and e.from is @model.workflowState()))
-    if event
-      # Trigger transition:from event
-      @model.trigger "transition:from:#{@model.workflowState()}"
-
-      # Change state
-      params = {}
-      params[@attrName] = event.to
-      @model.set params
-      
-      # Trigger transition:to event
-      @model.trigger "transition:to:#{@model.workflowState()}"
-      
-      true
+        # Change state
+        @model.set workflow.attrName, event.to
+        
+        # Trigger transition:to event
+        if workflow.name is 'default'
+          @model.trigger "transition:to:#{@model.get(workflow.attrName)}"
+        else
+          @model.trigger "transition:to:#{workflow.name}:#{@model.get(workflow.attrName)}"
+        
+        return true
+      else
+        throw "There is no transition '#{event}' for state '#{@model.get(workflow.attrName)}'."
     else
-      throw "There is no transition '#{event}' for state '#{@model.workflowState()}'."
-      false
-
-  workflowState: -> @model.get(@attrName)
+      throw "There is no workflow '#{workflowName}' defined."
+    false
