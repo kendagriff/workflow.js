@@ -129,23 +129,26 @@
     test('transition:from', __bind(function() {
       var i;
       i = 0;
-      this.user.bind('transition:from:visitor', function() {
+      this.user.on('transition:from:visitor', function() {
         return i = 1;
       });
       this.user.transition('signUp');
       return equal(i, 1);
     }, this));
-    return test('transition:to', __bind(function() {
+    test('transition:to', __bind(function() {
       var i;
       i = 0;
-      this.user.bind('transition:from:visitor', function() {
+      this.user.on('transition:from:visitor', function() {
         return i = 1;
       });
-      this.user.bind('transition:to:user', function() {
+      this.user.on('transition:to:user', function() {
         return i = 2;
       });
       this.user.transition('signUp');
       return equal(i, 2);
+    }, this));
+    return test('option to persist to server', __bind(function() {
+      return this.user.transition('signUp');
     }, this));
   });
 }).call(this);

@@ -10,7 +10,7 @@
       if (attrs.attrName) {
         this.attrName = attrs.attrName;
       }
-      if (!this.model.get('workflow_state')) {
+      if (!this.model.workflowState()) {
         params = {};
         params[this.attrName] = _.keys(this.model.workflow.states)[0];
         this.model.set(params, {
@@ -18,8 +18,9 @@
         });
       }
     }
-    Workflow.prototype.transition = function(event) {
+    Workflow.prototype.transition = function(event, opts) {
       var cb, e, params, state;
+      opts || (opts = {});
       state = this.model.workflow.states[this.model.workflowState()];
       e = state.events[event];
       if (e) {

@@ -12,7 +12,7 @@ class Backbone.Workflow
     @attrName = attrs.attrName if attrs.attrName
 
     # Set up the model's initial workflow state
-    unless @model.get('workflow_state')
+    unless @model.workflowState()
       params = {}
       params[@attrName] = _.keys(@model.workflow.states)[0]
       @model.set params, { silent: true }
@@ -20,7 +20,8 @@ class Backbone.Workflow
   # Handle transitions between states
   # Usage:
   #   @user.transition('go')
-  transition: (event) ->
+  transition: (event, opts) ->
+    opts ||= {}
     state = @model.workflow.states[@model.workflowState()]
     e = state.events[event]
     if e

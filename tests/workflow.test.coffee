@@ -75,15 +75,21 @@ $(document).ready ->
     
   test 'transition:from', =>
     i = 0
-    @user.bind 'transition:from:visitor', -> i = 1
+    @user.on 'transition:from:visitor', -> i = 1
     @user.transition 'signUp'
     equal i, 1
   
   test 'transition:to', =>
     i = 0
-    @user.bind 'transition:from:visitor', -> i = 1
-    @user.bind 'transition:to:user', -> i = 2
+    @user.on 'transition:from:visitor', -> i = 1
+    @user.on 'transition:to:user', -> i = 2
     @user.transition 'signUp'
     equal i, 2
+
+  test 'option to persist to server', =>
+    @user.transition 'signUp'
+
+
+
 
 
