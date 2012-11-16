@@ -38,6 +38,7 @@ class User extends Backbone.Model
 
   initialize: =>
     _.extend @, new Backbone.Workflow(@)
+    @bind 'transition:to:signUp', @onIssue
   
   onSignUp: =>
     @set { signed_up_at: new Date() }
