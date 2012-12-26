@@ -11,7 +11,7 @@ Finite-state machine (FSM) for Backbone.js with an **elegant** syntax. Works as 
 
 Just add these dependencies to your site's `<head>`, **in order**:
 
-```
+``` html
 <script src="jquery.js"></script>
 <script src="underscore.js"></script>
 <script src="backbone.js"></script>
@@ -22,7 +22,7 @@ Just add these dependencies to your site's `<head>`, **in order**:
 
 Let's start with a complete example (given in [CoffeeScript](http://coffeescript.org/)):
 
-```
+``` coffeescript
 class User extends Backbone.Model
   defaults:
     signed_up_at: null
@@ -58,7 +58,7 @@ Here's a more detailed rundown.
 
 Add this code to your `initialize` function:
 
-```
+``` coffeescript
 initialize: =>
     _.extend @, new Backbone.Workflow(@)
 ```
@@ -67,7 +67,7 @@ initialize: =>
 
 Create an object named `workflow`, as a property on your model, and define its events and states:
 
-```
+``` coffeescript
 class User extends Backbone.Model
   workflow:
     initial: 'visitor'
@@ -82,14 +82,14 @@ class User extends Backbone.Model
 ### Step 3: Instantiate Your Model
 
 The `workflow_state` attribute is offered as the default persistence field. This can be changed: see Customizations below.
-```
+``` coffeescript
 user = new User()
 user.get('workflow_state') # => "visitor"
 ```
 
 ### Step 5: Initiate a Transition
 
-```
+``` coffeescript
 user.triggerEvent('signUp')
 user.get('workflow_state') # => "user"
 ```
@@ -98,13 +98,13 @@ user.get('workflow_state') # => "user"
 
 Perhaps the most helpful feature of workflow.js is the ability to bind Backbone events to transitions in your views (or model). For example:
 
-```
+``` coffeescript
 user.bind 'transition:from:visitor', -> alert("I'll only be a visitor for a moment longer!")
 ```
 
 Or, its near equivalent:
 
-```
+``` coffeescript
 user.bind 'transition:to:user', -> alert("I'm no longer just a visitor!")
 ```
 
@@ -114,7 +114,7 @@ Transitions are handled before (`transition:from`), and after (`transition:to`),
 
 Customize workflow.js by passing an attributes hash to the Backbone.Workflow constructor:
 
-```
+``` coffeescript
 new Backbone.Workflow(@, { attrName: 'my_custom_db_field' })
 ```
 
@@ -128,7 +128,7 @@ To define multiple workflows, simply create a workflow object with a name of you
 
 Like this:
 
-```
+``` coffeescript
 class DualPersonalityUser extends Backbone.Model
   jekyll_workflow:
     initial: 'happy'
@@ -156,13 +156,13 @@ class DualPersonalityUser extends Backbone.Model
 
 To trigger an event, pass as the second argument the name of your workflow:
 
-```
+``` coffeescript
 @user.triggerEvent('stub_toe', 'jekyll_workflow')
 ```
 
 You'll handle transitions simililarly:
 
-```
+``` coffeescript
 @user.on 'transition:from:jekyll_workflow:happy'
 @user.on 'transition:to:jekyll_workflow:hurting'
 ```
