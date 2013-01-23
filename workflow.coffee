@@ -40,8 +40,10 @@ class Backbone.Workflow
       if event
         # Trigger transition:from event
         if workflow.name is 'default'
+          @model.trigger "transition:from"
           @model.trigger "transition:from:#{@model.get(workflow.attrName)}"
         else
+          @model.trigger "transition:from:#{workflow.name}"
           @model.trigger "transition:from:#{workflow.name}:#{@model.get(workflow.attrName)}"
 
         # Change state
@@ -49,8 +51,10 @@ class Backbone.Workflow
         
         # Trigger transition:to event
         if workflow.name is 'default'
+          @model.trigger "transition:to"
           @model.trigger "transition:to:#{@model.get(workflow.attrName)}"
         else
+          @model.trigger "transition:to:#{workflow.name}"
           @model.trigger "transition:to:#{workflow.name}:#{@model.get(workflow.attrName)}"
         
         return true
